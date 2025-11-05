@@ -1,0 +1,61 @@
+{% extends "layout.html" %}
+
+{% block title %}Your Profile - HerHealth{% endblock %}
+
+{% block content %}
+    <h2 style="font-weight: 600; font-size: 2rem;">Your Profile</h2>
+
+    <div class="card" style="margin-top: 1.5rem; padding: 2rem; max-width: 700px; margin-left: auto; margin-right: auto;">
+        
+        <div class="profile-item">
+            <strong>Name:</strong>
+            <span>{{ user.f_name }} {{ user.m_name or '' }} {{ user.l_name }}</span>
+        </div>
+        <div class="profile-item">
+            <strong>Email:</strong>
+            <span>{{ user.email }}</span>
+        </div>
+        <div class="profile-item">
+            <strong>Phone:</strong>
+            <span>{{ user.phone }}</span>
+        </div>
+        <div class="profile-item">
+            <strong>Date of Birth:</strong>
+            <span>{{ user.dob.strftime('%B %d, %Y') if user.dob and user.dob.strftime else user.dob }}</span>
+        </div>
+        
+        <hr style="margin: 1.5rem 0; border: 0; border-top: 1px solid #eee;">
+
+        <div class="profile-item">
+            <strong>City:</strong>
+            <span>{{ user.city }}</span>
+        </div>
+        <div class="profile-item">
+            <strong>State:</strong>
+            <span>{{ user.state }}</span>
+        </div>
+        <div class="profile-item">
+            <strong>Country:</strong>
+            <span>{{ user.country }}</span>
+        </div>
+    </div>
+
+    <style>
+        .profile-item {
+            display: flex;
+            flex-wrap: wrap;
+            font-size: 1.1rem;
+            margin-bottom: 1.25rem;
+            color: #333;
+        }
+        .profile-item strong {
+            font-weight: 600;
+            width: 160px;
+            flex-shrink: 0;
+            color: #111;
+        }
+        .profile-item span {
+            color: #555; 
+        }
+    </style>
+{% endblock %}

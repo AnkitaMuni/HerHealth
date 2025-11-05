@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% block title %}Log Medicine - HerHealth{% endblock %}
+
+{% block content %}
+<div class="form-wrapper">
+    <form class="form-container" method="POST" action="{{ url_for('log_medicine') }}" enctype="multipart/form-data">
+        <h2>Log Medicine</h2>
+        <p style="margin-bottom: 1.5rem; text-align: center; color: var(--text-light);">
+            This will add medicine to your most recently logged cycle.
+        </p>
+        
+        <div class="form-group">
+            <label for="name_of_medicine">Medicine Name</label>
+            <input type="text" id="name_of_medicine" name="name_of_medicine" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="dosage">Dosage (Optional)</label>
+            <input type="text" id="dosage" name="dosage" placeholder="e.g., 200mg twice daily">
+        </div>
+
+        <div class="form-group">
+            <label for="doctor_consultation">Doctor's Consultation (Optional)</label>
+            <input type="file" id="doctor_consultation" name="doctor_consultation" style="padding: 0; border: none;">
+        </div>
+
+        <button type="submit" class="btn" style="width: 100%;">Log Medicine</button>
+    </form>
+</div>
+{% endblock %}

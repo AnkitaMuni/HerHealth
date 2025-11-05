@@ -1,0 +1,61 @@
+{% extends "layout.html" %}
+
+{% block title %}Cycle History - HerHealth{% endblock %}
+
+{% block content %}
+    <h2>Your Cycle History</h2>
+
+    {% if not cycles %}
+        <div class="card">
+            <p>You have no logged cycles yet.</p>
+            <a href="{{ url_for('log_cycle') }}" class="btn" style="margin-top: 1rem;">Log Your First Cycle</a>
+        </div>
+    {% endif %}
+
+    {% for cycle in cycles %}
+        <div class="card" style="margin-bottom: 2rem;">
+            <h3>Cycle: {{ cycle.start_date.strftime('%b %d, %Y') }} - {{ cycle.end_date.strftime('%b %d, %Y') }}</h3>
+            
+            <div classs="cycle-details" style="margin-bottom: 1.5rem;">
+                <p><strong>Duration:</strong> {{ cycle.length }} days</p>
+                <p><strong>Mood:</strong> {{ cycle.mood_swings | capitalize }}</p>
+                {% if cycle.weight %}
+                    <p><strong>Weight:</strong> {{ cycle.weight }} kg</p>
+                {% endif %}
+                {% if cycle.height %}
+                    <p><strong>Height:</strong> {{ cycle.height }} cm</p>
+                {% endif %}
+            </div>
+
+            <h4>Medicines Logged</h4>
+
+            {% set cycle_meds = [] %}
+            {% for med in medicines %}
+                {% if med.cycle_id == cycle.cycle_id %}
+                    {% set _ = cycle_meds.append(med) %}
+                {% endif %}
+            {% endfor %}
+
+            {% if cycle_meds %}
+                <ul style="list-style: disc; padding-left: 20px;">
+                    {% for med in cycle_meds %}
+                        <li>
+                            {{ med.name_of_medicine }} ({{ med.dosage or 'No dosage specified' }})
+                            
+                            {% if med.doctor_consultation %}
+                                <a href="{{ url_for('get_consultation', med_id=med.med_id) }}" 
+                                   style="font-size: 0.9rem; margin-left: 10px;">
+                                   [Download Consultation]
+                                </a>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p style="font-style: italic;">No medicine logged for this cycle.</p>
+            {% endif %}
+
+        </div>
+    {% endfor %}
+
+{% endblock %}

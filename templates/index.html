@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+
+{% block title %}Welcome - HerHealth{% endblock %}
+
+{% block content %}
+    <section class="hero">
+        <h1>Track Your Cycle.</h1>
+        <h1>Empower Your Health.</h1>
+        <p>Your personal cycle tracking and wellness partner. Get predictions, log symptoms, and take control of your health.</p>
+        <div class="btn-group">
+            {% if session.user_id %}
+                <a href="{{ url_for('dashboard') }}" class="btn">Go to Dashboard</a>
+            {% else %}
+                <a href="{{ url_for('register') }}" class="btn">Get Started</a>
+                <a href="{{ url_for('login') }}" class="btn btn-secondary">Login</a>
+            {% endif %}
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="feature-card">
+            <h3>Track Your Cycle</h3>
+            <p>Easily log your period start and end dates, symptoms, and mood.</p>
+        </div>
+        <div class="feature-card">
+            <h3>Smart Predictions</h3>
+            <p>Get AI-powered predictions for your next period and fertile window.</p>
+        </div>
+        <div class="feature-card">
+            <h3>Log Medicine</h3>
+            <p>Keep a clear history of your medications and dosages for each cycle.</p>
+        </div>
+    </section>
+{% endblock %}

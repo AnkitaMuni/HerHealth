@@ -1,0 +1,66 @@
+{% extends "layout.html" %}
+
+{% block title %}Register - HerHealth{% endblock %}
+
+{% block content %}
+<div class="form-wrapper">
+    <form class="form-container" method="POST" action="{{ url_for('register') }}">
+        <h2>Create Your Account</h2>
+        
+        <div class="form-group">
+            <label for="f_name">First Name</label>
+            <input type="text" id="f_name" name="f_name" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="m_name">Middle Name (Optional)</label>
+            <input type="text" id="m_name" name="m_name">
+        </div>
+        
+        <div class="form-group">
+            <label for="l_name">Last Name</label>
+            <input type="text" id="l_name" name="l_name" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="phone">Phone</label>
+            <input type="tel" id="phone" name="phone" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="dob">Date of Birth</label>
+            <input type="date" id="dob" name="dob" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="city">City</label>
+            <input type="text" id="city" name="city" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="state">State</label>
+            <input type="text" id="state" name="state" required>
+        </div>
+
+        <div class="form-group">
+            <label for="country">Country</label>
+            <input type="text" id="country" name="country" required>
+        </div>
+        <button type="submit" class="btn" style="width: 100%;">Register</button>
+
+        <p style="margin-top: 1.5rem; text-align: center;">
+            Already have an account? <a href="{{ url_for('login') }}">Login here</a>.
+        </p>
+    </form>
+</div>
+{% endblock %}

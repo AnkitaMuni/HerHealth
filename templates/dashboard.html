@@ -1,0 +1,204 @@
+{% extends "layout.html" %}
+
+{% block title %}Dashboard - HerHealth{% endblock %}
+
+{% block content %}
+    <h2 style="font-weight: 600; font-size: 2rem;">Welcome, {{ user_name }}!</h2>
+
+    <div class="dashboard-grid" style="margin-top: 1.5rem;">
+        <div class="card">
+            <h3>Your Next Prediction</h3>
+            {% if prediction %}
+                <div class="prediction-item">
+                    <strong>Predicted Start:</strong> 
+                    {{ prediction.possible_start_start }} to {{ prediction.possible_start_end }}
+                </div>
+                <div class="prediction-item">
+                    <strong>Est. Ovulation:</strong> 
+                    {{ prediction.ovulation_date }}
+                </div>
+                <div class="prediction-item">
+                    <strong>Est. Duration:</strong> {{ prediction.length }} days
+                </div>
+            {% else %}
+                <p>We don't have enough data to make a prediction yet.</p>
+                <p>Please log at least two cycles.</p>
+            {% endif %}
+            
+            <div style="margin-top: 1.5rem; display: flex; flex-wrap: wrap; gap: 1rem;">
+                <a href="{{ url_for('log_cycle') }}" class="btn">Log a New Cycle</a>
+                <a href="{{ url_for('history') }}" class="btn btn-secondary">View History</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Notifications</h3>
+            {% if notifications %}
+                <ul class="notification-list">
+                    {% for notif in notifications %}
+                        <li>
+                            {% if notif.noti_id > 0 %}
+                                <a href="{{ url_for('dismiss_notification', noti_id=notif.noti_id) }}" 
+                                   style="float: right; text-decoration: none; font-size: 0.8rem; color: #aaa;">[Dismiss]</a>
+                            {% endif %}
+
+                            <strong>{{ notif.start_date.strftime('%Y-%m-%d') }}:</strong><br>
+                            {{ notif.medication_stock }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No new notifications.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="dashboard-grid" style="margin-top: 2rem;">
+        <div class="card">
+            <h3>Weight & Height Log</h3>
+            <p>Tracks your logged weight and height over time.</p>
+            <div class="chart-container" style="position: relative; height:300px; width:100%">
+                 <canvas id="weightHeightChart"></canvas>
+            </div>
+            <p id="whErrorMsg" style="color: #888; font-style: italic; display: none;"></p>
+        </div>
+        <div class="card">
+            <h3>Cycle Analytics</h3>
+            <p>Compares your period duration vs. your full cycle length.</p>
+            <div class="chart-container" style="position: relative; height:300px; width:100%">
+                <canvas id="cycleChart"></canvas>
+            </div>
+            <p id="cycleErrorMsg" style="color: #888; font-style: italic; display: none;"></p>
+        </div>
+    </div>
+    
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    if (typeof Chart === 'undefined') {
+        document.getElementById('whErrorMsg').innerText = "Error: Charting library not loaded. Please ensure layout.html has the correct <script> tag.";
+        document.getElementById('cycleErrorMsg').innerText = "Error: Charting library not loaded. Please ensure layout.html has the correct <script> tag.";
+        document.getElementById('whErrorMsg').style.display = 'block';
+        document.getElementById('cycleErrorMsg').style.display = 'block';
+        return;
+    }
+
+    let chartData;
+    try {
+        chartData = JSON.parse('{{ chart_data | safe }}');
+    } catch (e) {
+        console.error("Error parsing chart data:", e);
+        document.getElementById('whErrorMsg').innerText = "Could not load chart data.";
+        document.getElementById('whErrorMsg').style.display = 'block';
+        return;
+    }
+
+    function hasData(arr) {
+        if (!arr || arr.length === 0) return false;
+        return arr.some(val => val !== null && val !== undefined);
+    }
+
+    const whCtx = document.getElementById('weightHeightChart');
+    if (hasData(chartData.weight) || hasData(chartData.height)) {
+        new Chart(whCtx, {
+            type: 'line',
+            data: {
+                labels: chartData.labels,
+                datasets: [
+                    {
+                        label: 'Weight (kg)',
+                        data: chartData.weight,
+                        borderColor: 'rgba(235, 100, 160, 1)',
+                        backgroundColor: 'rgba(235, 100, 160, 0.2)',
+                        fill: false,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Height (cm)',
+                        data: chartData.height,
+                        borderColor: 'rgba(100, 100, 230, 1)',
+                        backgroundColor: 'rgba(100, 100, 230, 0.2)',
+                        fill: false,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { 
+                        title: { display: true, text: 'Date Logged' }
+                    },
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: { display: true, text: 'Weight (kg)' }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: { display: true, text: 'Height (cm)' },
+                        grid: { drawOnChartArea: false } 
+                    }
+                }
+            }
+        });
+    } else {
+        document.getElementById('whErrorMsg').innerText = "Log weight or height on your 'Log Cycle' page to see data here.";
+        document.getElementById('whErrorMsg').style.display = 'block';
+    }
+
+
+    const cycleCtx = document.getElementById('cycleChart');
+    if (hasData(chartData.period_length)) {
+        new Chart(cycleCtx, {
+            type: 'bar',
+            data: {
+                labels: chartData.labels,
+                datasets: [
+                    {
+                        label: 'Period Duration (Days)',
+                        data: chartData.period_length,
+                        backgroundColor: 'rgba(255, 159, 64, 0.7)',
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Full Cycle Length (Days)',
+                        data: chartData.cycle_length,
+                        backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                        yAxisID: 'y'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { 
+                        title: { display: true, text: 'Cycle Start Date' }
+                    },
+    
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: { display: true, text: 'Days' },
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    } else {
+        document.getElementById('cycleErrorMsg').innerText = "Log at least two cycles to see your cycle analytics.";
+        document.getElementById('cycleErrorMsg').style.display = 'block';
+    }
+
+});
+</script>
+{% endblock %}
